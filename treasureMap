@@ -1,0 +1,127 @@
+clear()
+
+from m3 import alignXYTuple
+
+dict = {
+"N":North,
+"S":South,
+"E":East,
+"W":West
+}
+
+
+jump(Unlocks.Treasure_Map)
+def task():
+	while get_ground_type() != Grounds.Basalt:
+		for j in range(get_world_size()):
+			if get_ground_type() != Grounds.Basalt:
+				dig()
+			move(North)
+alignXYTuple((0,0))
+for i in range(get_world_size()-1):
+	spawn_drone(task)
+	move(East)
+task()
+while num_drones() > 1:
+	pass
+alignXYTuple((0,0))
+map = measure()
+alignXYTuple(map)
+dig()
+
+path = list(measure())
+path2 = []
+hori = get_pos_x()
+vert = get_pos_y()
+for i in range(len(path)):
+	if path[i] == "D":
+		if i != 0:
+			path2.append([hori,vert])
+		path2.append("D")
+	elif path[i] == "N":
+		vert += 1
+	elif path[i] == "S":
+		vert -= 1
+	elif path[i] == "E":
+		hori += 1
+	elif path[i] == "W":
+		hori -= 1
+
+		
+		
+oppo = {
+North:South,
+South:North,
+East:West,
+West:East
+}
+prefer = {
+"TR":[South,West,North,East],
+"TL":[South,East,North,West],
+"BR":[North,West,South,East],
+"BL":[North,East,South,West]
+}
+
+def vector(cPos,tPos):
+	cX,cY = cPos
+	tX,tY = tPos
+	if cX >= tX:
+		h = "R"
+	else:
+		h = "L"
+	if cY >= tY:
+		v = "T"
+	else:
+		v = "B"
+	ans = v + h
+	return ans
+
+def getPos():
+	return (get_pos_x(),get_pos_y())
+
+def newPos(x,y,dir):
+	if dir == North:
+		why = y + 1
+		eks = x
+	elif dir == South:
+		why = y - 1
+		eks = x
+	elif dir == East:
+		eks = x + 1
+		why = y
+	elif dir == West:
+		eks = x - 1
+		why = y
+	return (eks,why)
+
+def DFS(endX,endY):
+	
+	endPos = (endX,endY)
+	visited = set()
+	backtrack_stack = []
+	while getPos() != endPos:
+		
+		currX,currY = getPos()
+		visited.add(getPos())
+		
+		
+		found_new_path = False
+		for direction in prefer[vector(getPos(),endPos)]:
+			if (get_ground_type(direction) == Grounds.Treasure_Path) and (get_pos_z(direction) == get_pos_z()):
+				next_x,next_y = newPos(currX,currY,direction)
+				if (next_x,next_y) not in visited:
+					backtrack_stack.append(oppo[direction])
+					move(direction)
+					found_new_path = True
+					break
+			
+		if not found_new_path:
+			backtrack_move = backtrack_stack.pop()
+			move(backtrack_move)
+
+for i in path2:
+	if i == "D":
+		dig()
+	else:
+		DFS(i[0],i[1])
+harvest()
