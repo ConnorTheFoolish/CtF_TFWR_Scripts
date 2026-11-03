@@ -98,26 +98,26 @@ def DFS(endX,endY):
 	
 	endPos = (endX,endY)
 	visited = set()
-	backtrack_stack = []
+	stack = []
 	while getPos() != endPos:
 		
 		currX,currY = getPos()
 		visited.add(getPos())
 		
 		
-		found_new_path = False
+		fndNewPath = False
 		for direction in prefer[vector(getPos(),endPos)]:
 			if (get_ground_type(direction) == Grounds.Treasure_Path) and (get_pos_z(direction) == get_pos_z()):
-				next_x,next_y = newPos(currX,currY,direction)
-				if (next_x,next_y) not in visited:
-					backtrack_stack.append(oppo[direction])
+				nxtX,nxtY = newPos(currX,currY,direction)
+				if (nxtX,nxtY) not in visited:
+					stack.append(oppo[direction])
 					move(direction)
-					found_new_path = True
+					fndNewPath = True
 					break
 			
-		if not found_new_path:
-			backtrack_move = backtrack_stack.pop()
-			move(backtrack_move)
+		if not fndNewPath:
+			backtrack = stack.pop()
+			move(backtrack)
 
 for i in path2:
 	if i == "D":
